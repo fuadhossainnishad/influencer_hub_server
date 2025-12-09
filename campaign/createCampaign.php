@@ -3,13 +3,16 @@ header("Access-Control-Allow-Origin: http://localhost:3000");
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header('Content-Type: application/json');
 
 require_once "../config/database.php";
+require_once "../db/campaignTable.php";
+
 
 $db = new Database();
 $conn = $db->connect();
 
-// Authenticate token (pseudo code)
+// ------------------- AUTHENTICATION -------------------
 $headers = getallheaders();
 if (!isset($headers['Authorization'])) {
     echo json_encode(["success" => false, "message" => "Unauthorized"]);
@@ -17,10 +20,9 @@ if (!isset($headers['Authorization'])) {
 }
 
 $token = str_replace("Bearer ", "", $headers['Authorization']);
+// TODO: Verify token from user table here
 
-// TODO: Verify token from user table
-
-// Handle POST data
+// ------------------- POST DATA -------------------
 $title = $_POST['title'] ?? null;
 $description = $_POST['description'] ?? null;
 $goal = $_POST['goal'] ?? null;
@@ -37,16 +39,27 @@ if (!$title || !$description || !$goal || !$budget || !$timeline || !$deliverabl
     exit;
 }
 
-// Upload files
+// ------------------- CREATE UPLOAD FOLDERS IF NOT EXISTS -------------------
+$thumbnailDir = "../uploads/thumbnails/";
+$creativeDir = "../uploads/creative/";
+
+if (!is_dir($thumbnailDir)) {
+    mkdir($thumbnailDir, 0777, true);
+}
+if (!is_dir($creativeDir)) {
+    mkdir($creativeDir, 0777, true);
+}
+
+// ------------------- UPLOAD FILES -------------------
 $thumbnailPath = null;
 if ($thumbnail && $thumbnail['error'] == 0) {
-    $thumbnailPath = "uploads/thumbnails/" . uniqid() . "_" . $thumbnail['name'];
+    $thumbnailPath = "uploads/thumbnails/" . uniqid() . "_" . basename($thumbnail['name']);
     move_uploaded_file($thumbnail['tmp_name'], "../" . $thumbnailPath);
 }
 
 $creativePath = null;
 if ($creative && $creative['error'] == 0) {
-    $creativePath = "uploads/creative/" . uniqid() . "_" . $creative['name'];
+    $creativePath = "uploads/creative/" . uniqid() . "_" . basename($creative['name']);
     move_uploaded_file($creative['tmp_name'], "../" . $creativePath);
 }
 
@@ -59,7 +72,6 @@ try {
     $stmt->execute([$title, $description, $goal, $budget, $timeline, $deliverables, $thumbnailPath, $creativePath]);
 
     echo json_encode(["success" => true, "message" => "Campaign created successfully"]);
-
 } catch(PDOException $e) {
     echo json_encode(["success" => false, "message" => $e->getMessage()]);
 }
