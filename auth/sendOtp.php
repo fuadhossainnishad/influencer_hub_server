@@ -1,4 +1,8 @@
 <?php
+header("Access-Control-Allow-Origin: http://localhost:3000");
+header("Access-Control-Allow-Credentials: true");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 header('Content-Type: application/json');
 require_once "../config/database.php";
 
@@ -13,7 +17,7 @@ if (!isset($data->email)) {
 }
 
 $email = $data->email;
-$otp = rand(100000, 999999); // 6-digit OTP
+$otp = rand(100000, 999999);
 
 try {
     // Delete old OTP
@@ -30,6 +34,6 @@ try {
         "otp" => $otp // ⚠️ Remove this in production
     ]);
 
-} catch(PDOException $e) {
+} catch (PDOException $e) {
     echo json_encode(["success" => false, "message" => $e->getMessage()]);
 }

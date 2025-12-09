@@ -1,4 +1,8 @@
 <?php
+header("Access-Control-Allow-Origin: http://localhost:3000");
+header("Access-Control-Allow-Credentials: true");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 header('Content-Type: application/json');
 require_once "../config/database.php";
 
@@ -7,10 +11,11 @@ $conn = $db->connect();
 
 $data = json_decode(file_get_contents("php://input"));
 
-if (!isset($data->name) || 
-    !isset($data->username) || 
-    !isset($data->password) || 
-    !isset($data->email)) {
+if (
+    !isset($data->username) ||
+    !isset($data->password) ||
+    !isset($data->email)
+) {
 
     echo json_encode([
         "success" => false,
@@ -19,7 +24,6 @@ if (!isset($data->name) ||
     exit;
 }
 
-$name = $data->name;
 $username = $data->username;
 $password = password_hash($data->password, PASSWORD_BCRYPT);
 $email = $data->email;
@@ -35,16 +39,16 @@ if ($check->rowCount() > 0) {
 
 try {
     $stmt = $conn->prepare("
-        INSERT INTO users (name, username, email, password)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO users ( username, email, password)
+        VALUES ( ?, ?, ?)
     ");
-    $stmt->execute([$name, $username, $email, $password]);
+    $stmt->execute([$username, $email, $password]);
 
     echo json_encode([
-        "success" => true, 
+        "success" => true,
         "message" => "User registered successfully"
     ]);
 
-} catch(PDOException $e) {
+} catch (PDOException $e) {
     echo json_encode(["success" => false, "message" => $e->getMessage()]);
 }
