@@ -72,6 +72,6 @@ try {
     $stmt->execute([$title, $description, $goal, $budget, $timeline, $deliverables, $thumbnailPath, $creativePath]);
 
     echo json_encode(["success" => true, "message" => "Campaign created successfully"]);
-} catch(PDOException $e) {
+} catch (PDOException $e) {
     echo json_encode(["success" => false, "message" => $e->getMessage()]);
 }
