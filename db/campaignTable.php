@@ -12,8 +12,7 @@ try {
         description TEXT NOT NULL,
         goal TEXT NOT NULL,
         budget VARCHAR(50) NOT NULL,
-        timeline INT NOT NULL,
-        deliverables TEXT NOT NULL,
+        timeline INT NOT NULL,a
         thumbnail VARCHAR(255),
         creative VARCHAR(255),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

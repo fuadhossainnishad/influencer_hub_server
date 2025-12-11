@@ -48,6 +48,9 @@ try {
     // generate secure token
     $token = bin2hex(random_bytes(32));
 
+    $saveToken = $conn->prepare("UPDATE users SET token=? WHERE id=?");
+    $saveToken->execute([$token, $user["id"]]);
+
     echo json_encode([
         "success" => true,
         "message" => "Login successful",
